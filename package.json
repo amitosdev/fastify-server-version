@@ -1,0 +1,29 @@
+{
+  "name": "fastify-server-version",
+  "version": "0.0.1",
+  "description": "A Fastify plugin to add server version and last commit to respose header",
+  "main": "request.js",
+  "scripts": {
+    "test": "tap --reporter=list --watch"
+  },
+  "author": "Amit Tal",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/amitosdev/fastify-server-version#readme",
+  "keywords": [
+    "fastify",
+    "headers",
+    "request"
+  ],
+  "dependencies": {
+    "fastify-plugin": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.30.0",
+    "eslint-plugin-prettierx": "^0.18.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "fastify": "^3.24.1",
+    "jest": "^27.4.3",
+    "mock-fs": "^5.1.2",
+    "tap": "^15.1.5"
+  }
+}
