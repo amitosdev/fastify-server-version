@@ -2,7 +2,7 @@
   "name": "fastify-server-version",
   "version": "1.0.0",
   "description": "A Fastify plugin to add server version and last commit to respose header",
-  "main": "request.js",
+  "main": "serverVersion.js",
   "scripts": {
     "test": "tap --reporter=list --watch"
   },
