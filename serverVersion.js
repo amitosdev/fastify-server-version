@@ -1,40 +1,42 @@
-const fp = require('fastify-plugin')
-const { exec } = require('child_process')
-const path = require('path')
-const { readFile } = require('fs')
-const debug = require('debug')('fastify-server-version')
+import { exec } from 'node:child_process'
+import { readFile } from 'node:fs'
+import path from 'node:path'
+import debug from 'debug'
+import fp from 'fastify-plugin'
 
-function getlastCommitHash (optsLastCommitHash, isThrowOnErrors, cb) {
+const debugLogger = debug('fastify-server-version')
+
+function getlastCommitHash(optsLastCommitHash, isThrowOnErrors, cb) {
   if (optsLastCommitHash) return cb(null, optsLastCommitHash)
   if (process.env.LAST_COMMIT_HASH) return cb(null, process.env.LAST_COMMIT_HASH)
   exec('git rev-parse HEAD', (err, stdout) => {
     if (err) {
-      debug('error in getlastCommitHash from git: ', err)
+      debugLogger('error in getlastCommitHash from git: ', err)
       return cb(isThrowOnErrors ? err : null)
     }
     cb(null, stdout.toString().trim())
   })
 }
 
-function getVersion (optsVersion, isThrowOnErrors, cb) {
+function getVersion(optsVersion, isThrowOnErrors, cb) {
   if (optsVersion) return cb(null, optsVersion)
   const packageJsonPath = path.join(process.cwd(), 'package.json')
   readFile(packageJsonPath, 'utf-8', (err, file) => {
     if (err) {
-      debug('error in getVersion: ', err)
+      debugLogger('error in getVersion: ', err)
       return cb(isThrowOnErrors ? err : null)
     }
     try {
       const { version } = JSON.parse(file)
       cb(null, version)
     } catch (e) {
-      debug('error in getVersion: ', e)
+      debugLogger('error in getVersion: ', e)
       cb(isThrowOnErrors ? e : null)
     }
   })
 }
 
-module.exports = ({
+export function serverVersion({
   versionHeaderName = 'x-server-version',
   commitHeaderName = 'x-commit-hash',
   isExposeLastCommit = true,
@@ -42,8 +44,8 @@ module.exports = ({
   lastCommitHash,
   version,
   isThrowOnErrors = false
-} = {}) => {
-  function plugin (instance, options, done) {
+} = {}) {
+  function plugin(instance, options, done) {
     getlastCommitHash(lastCommitHash, isThrowOnErrors, (err, lastCommit) => {
       if (err) return done(err)
       getVersion(version, isThrowOnErrors, (err, serverVersion) => {

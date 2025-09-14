@@ -1,4 +1,4 @@
-# Fastify Server Version [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+# Fastify Server Version
 
 A Fastify plugin to add server version and last commit to respose header
 
@@ -11,8 +11,8 @@ A Fastify plugin to add server version and last commit to respose header
 ## Usage
 
 ```javascript
-const Fastify = require('fastify')
-const serverVersion = require('fastify-server-version')
+import Fastify from 'fastify'
+import { serverVersion } from 'fastify-server-version'
 
 const fastify = Fastify()
 

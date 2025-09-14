@@ -1,11 +1,11 @@
-const { test } = require('tap')
-const Fastify = require('fastify')
-const serverVersion = require('../serverVersion')
+import Fastify from 'fastify'
+import { test } from 'tap'
+import { serverVersion } from '../serverVersion.js'
 
 const lch = 'abc123'
 const semverRegex = /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/
 
-function getApp (serverVersionOpts) {
+function getApp(serverVersionOpts) {
   const fastify = Fastify()
 
   fastify.register(serverVersion(serverVersionOpts))
@@ -16,7 +16,7 @@ function getApp (serverVersionOpts) {
   return fastify
 }
 
-test('with default configuration and commit hash from env', t => {
+test('with default configuration and commit hash from env', (t) => {
   process.env.LAST_COMMIT_HASH = lch
 
   const fastify = getApp()
@@ -35,7 +35,7 @@ test('with default configuration and commit hash from env', t => {
   )
 })
 
-test('with default configuration and commit hash and version from opts', t => {
+test('with default configuration and commit hash and version from opts', (t) => {
   const opts = { lastCommitHash: 'abc', version: '8.8.8' }
   const fastify = getApp(opts)
 
@@ -53,7 +53,7 @@ test('with default configuration and commit hash and version from opts', t => {
   )
 })
 
-test('with diffrent headers and commit hash from env', t => {
+test('with diffrent headers and commit hash from env', (t) => {
   process.env.LAST_COMMIT_HASH = lch
   const opts = { versionHeaderName: 'x-foo', commitHeaderName: 'x-bar' }
   const fastify = getApp(opts)
@@ -72,7 +72,7 @@ test('with diffrent headers and commit hash from env', t => {
   )
 })
 
-test('dont expose headers', t => {
+test('dont expose headers', (t) => {
   process.env.LAST_COMMIT_HASH = lch
 
   const fastify = getApp({ isExposeLastCommit: false, isExposeVersion: false })
