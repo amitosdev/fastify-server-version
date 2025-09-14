@@ -1,6 +1,6 @@
 {
   "name": "fastify-server-version",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A Fastify plugin to add server version and last commit to respose header",
   "type": "module",
   "main": "serverVersion.js",
