@@ -1,39 +1,24 @@
-import { exec } from 'node:child_process'
-import { readFile } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import debug from 'debug'
 import fp from 'fastify-plugin'
+import gitCommitInfo from 'git-commit-info'
 
 const debugLogger = debug('fastify-server-version')
 
-function getlastCommitHash(optsLastCommitHash, isThrowOnErrors, cb) {
-  if (optsLastCommitHash) return cb(null, optsLastCommitHash)
-  if (process.env.LAST_COMMIT_HASH) return cb(null, process.env.LAST_COMMIT_HASH)
-  exec('git rev-parse HEAD', (err, stdout) => {
-    if (err) {
-      debugLogger('error in getlastCommitHash from git: ', err)
-      return cb(isThrowOnErrors ? err : null)
-    }
-    cb(null, stdout.toString().trim())
-  })
+async function getlastCommitHash(optsLastCommitHash) {
+  if (optsLastCommitHash) return optsLastCommitHash
+  if (process.env.LAST_COMMIT_HASH) return process.env.LAST_COMMIT_HASH
+  const { shortCommit } = await gitCommitInfo()
+  return shortCommit
 }
 
-function getVersion(optsVersion, isThrowOnErrors, cb) {
-  if (optsVersion) return cb(null, optsVersion)
+async function getVersion(optsVersion) {
+  if (optsVersion) return optsVersion
   const packageJsonPath = path.join(process.cwd(), 'package.json')
-  readFile(packageJsonPath, 'utf-8', (err, file) => {
-    if (err) {
-      debugLogger('error in getVersion: ', err)
-      return cb(isThrowOnErrors ? err : null)
-    }
-    try {
-      const { version } = JSON.parse(file)
-      cb(null, version)
-    } catch (e) {
-      debugLogger('error in getVersion: ', e)
-      cb(isThrowOnErrors ? e : null)
-    }
-  })
+  const pkgJson = await readFile(packageJsonPath, 'utf-8')
+  const { version } = JSON.parse(pkgJson)
+  return version
 }
 
 export function serverVersion({
@@ -45,29 +30,21 @@ export function serverVersion({
   version,
   isThrowOnErrors = false
 } = {}) {
-  function plugin(instance, options, done) {
-    getlastCommitHash(lastCommitHash, isThrowOnErrors, (err, lastCommit) => {
-      if (err) return done(err)
-      getVersion(version, isThrowOnErrors, (err, serverVersion) => {
-        if (err) return done(err)
-
-        if (isExposeLastCommit && lastCommit) {
-          instance.addHook('onSend', (request, reply, payload, next) => {
-            reply.header(commitHeaderName, lastCommit)
-            next()
-          })
-        }
-
-        if (isExposeVersion && serverVersion) {
-          instance.addHook('onSend', (request, reply, payload, next) => {
-            reply.header(versionHeaderName, serverVersion)
-            next()
-          })
-        }
-
-        done()
-      })
-    })
+  async function plugin(instance, options) {
+    try {
+      const lastCommit = await getlastCommitHash(lastCommitHash)
+      const serverVersion = await getVersion(version)
+      if (isExposeLastCommit || isExposeVersion) {
+        instance.addHook('onSend', (request, reply, payload, next) => {
+          isExposeLastCommit && reply.header(commitHeaderName, lastCommit)
+          isExposeVersion && reply.header(versionHeaderName, serverVersion)
+          next()
+        })
+      }
+    } catch (err) {
+      debugLogger('error in fastify-server-version: ', err)
+      if (isThrowOnErrors) throw err
+    }
   }
   return fp(plugin, {
     fastify: '>= 3',
