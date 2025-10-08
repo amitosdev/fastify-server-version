@@ -2,15 +2,15 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import debug from 'debug'
 import fp from 'fastify-plugin'
-import gitCommitInfo from 'git-commit-info'
+import { getGitLastCommitHash } from 'git-last-commit-hash'
 
 const debugLogger = debug('fastify-server-version')
 
 async function getlastCommitHash(optsLastCommitHash) {
   if (optsLastCommitHash) return optsLastCommitHash
   if (process.env.LAST_COMMIT_HASH) return process.env.LAST_COMMIT_HASH
-  const { shortCommit } = await gitCommitInfo()
-  return shortCommit
+  const lastCommit = await getGitLastCommitHash()
+  return lastCommit.slice(-7)
 }
 
 async function getVersion(optsVersion) {

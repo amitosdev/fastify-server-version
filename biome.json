@@ -1,29 +1,35 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": ["**", "!**/node_modules/**", "!**/dist/**", "!**/tests/**"],
+    "includes": ["**", "!node_modules", "!.next", "!dist", "!build"],
     "ignoreUnknown": true
   },
   "linter": {
-    "enabled": true,
     "rules": {
       "complexity": {
+        "useOptionalChain": "off",
         "noExcessiveCognitiveComplexity": {
           "level": "info",
-          "options": {
-            "maxAllowedComplexity": 50
-          }
+          "options": { "maxAllowedComplexity": 50 }
         }
       },
       "suspicious": {
-        "noConsole": "error"
+        "noConsole": "warn"
       },
       "style": {
         "useBlockStatements": "off",
         "noCommonJs": "error",
-        "useNamingConvention": "off",
-        "useFilenamingConvention": "off",
-        "noParameterAssign": "error",
+        "useNamingConvention": "warn",
+        "useFilenamingConvention": {
+          "level": "warn",
+          "options": {
+            "strictCase": false,
+            "requireAscii": true,
+            "filenameCases": ["camelCase", "PascalCase"]
+          }
+        },
+        "noParameterAssign": "warn",
+        "noDefaultExport": "warn",
         "useAsConstAssertion": "error",
         "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
@@ -36,18 +42,18 @@
       },
       "correctness": {
         "noNodejsModules": "off",
-        "noUnusedImports": "warn",
-        "noUndeclaredVariables": "error",
-        "noUndeclaredDependencies": "error",
-        "useImportExtensions": "off"
+        "useImportExtensions": "error",
+        "noUndeclaredVariables": "error"
       }
+    },
+    "domains": {
+      "test": "recommended"
     }
   },
   "formatter": {
     "formatWithErrors": true,
     "lineWidth": 120,
-    "indentStyle": "space",
-    "indentWidth": 2
+    "indentStyle": "space"
   },
   "javascript": {
     "formatter": {
