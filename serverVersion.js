@@ -26,6 +26,7 @@ export function serverVersion({
   commitHeaderName = 'x-commit-hash',
   isExposeLastCommit = true,
   isExposeVersion = true,
+  isAddAccessControlExposeHeaders = true,
   lastCommitHash,
   version,
   isThrowOnErrors = false
@@ -36,8 +37,31 @@ export function serverVersion({
       const serverVersion = await getVersion(version)
       if (isExposeLastCommit || isExposeVersion) {
         instance.addHook('onSend', (request, reply, payload, next) => {
-          isExposeLastCommit && reply.header(commitHeaderName, lastCommit)
-          isExposeVersion && reply.header(versionHeaderName, serverVersion)
+          if (isExposeLastCommit) {
+            reply.header(commitHeaderName, lastCommit)
+          }
+          if (isExposeVersion) {
+            reply.header(versionHeaderName, serverVersion)
+          }
+
+          if (isAddAccessControlExposeHeaders) {
+            const accessControlExposeHeaders = []
+            if (isExposeLastCommit) {
+              accessControlExposeHeaders.push(commitHeaderName)
+            }
+            if (isExposeVersion) {
+              accessControlExposeHeaders.push(versionHeaderName)
+            }
+
+            // Merge with existing Access-Control-Expose-Headers if present
+            const existing = reply.getHeader('Access-Control-Expose-Headers')
+            if (existing) {
+              const existingHeaders = typeof existing === 'string' ? existing.split(',').map(h => h.trim()) : []
+              accessControlExposeHeaders.push(...existingHeaders)
+            }
+
+            reply.header('Access-Control-Expose-Headers', accessControlExposeHeaders.join(', '))
+          }
           next()
         })
       }

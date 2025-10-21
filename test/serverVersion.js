@@ -108,3 +108,67 @@ test('dont expose headers', (t) => {
     }
   )
 })
+
+test('Access-Control-Expose-Headers contains only plugin headers', (t) => {
+  const opts = { lastCommitHash: 'abc123', version: '1.0.0' }
+  const fastify = getApp(opts)
+
+  fastify.inject(
+    {
+      method: 'GET',
+      url: '/'
+    },
+    (err, res) => {
+      t.error(err)
+      t.equal(res.headers['access-control-expose-headers'], 'x-commit-hash, x-server-version')
+      t.end()
+    }
+  )
+})
+
+test('Access-Control-Expose-Headers merges with user-defined headers', (t) => {
+  const opts = { lastCommitHash: 'abc123', version: '1.0.0' }
+  const fastify = Fastify()
+
+  fastify.register(serverVersion(opts))
+
+  fastify.get('/', (_request, reply) => {
+    reply.header('Access-Control-Expose-Headers', 'X-Custom-Header, X-Another-Header')
+    reply.send({ hello: 'world' })
+  })
+
+  fastify.inject(
+    {
+      method: 'GET',
+      url: '/'
+    },
+    (err, res) => {
+      t.error(err)
+      const exposedHeaders = res.headers['access-control-expose-headers']
+      t.ok(exposedHeaders.includes('x-commit-hash'))
+      t.ok(exposedHeaders.includes('x-server-version'))
+      t.ok(exposedHeaders.includes('X-Custom-Header'))
+      t.ok(exposedHeaders.includes('X-Another-Header'))
+      t.end()
+    }
+  )
+})
+
+test('isAddAccessControlExposeHeaders set to false does not add Access-Control-Expose-Headers', (t) => {
+  const opts = { lastCommitHash: 'abc123', version: '1.0.0', isAddAccessControlExposeHeaders: false }
+  const fastify = getApp(opts)
+
+  fastify.inject(
+    {
+      method: 'GET',
+      url: '/'
+    },
+    (err, res) => {
+      t.error(err)
+      t.equal(res.headers['x-commit-hash'], opts.lastCommitHash)
+      t.equal(res.headers['x-server-version'], opts.version)
+      t.notOk(res.headers['access-control-expose-headers'])
+      t.end()
+    }
+  )
+})
