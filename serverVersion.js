@@ -10,7 +10,7 @@ async function getlastCommitHash(optsLastCommitHash) {
   if (optsLastCommitHash) return optsLastCommitHash
   if (process.env.LAST_COMMIT_HASH) return process.env.LAST_COMMIT_HASH
   const lastCommit = await getGitLastCommitHash()
-  return lastCommit.slice(-7)
+  return lastCommit.slice(0, 7)
 }
 
 async function getVersion(optsVersion) {
@@ -56,7 +56,7 @@ export function serverVersion({
             // Merge with existing Access-Control-Expose-Headers if present
             const existing = reply.getHeader('Access-Control-Expose-Headers')
             if (existing) {
-              const existingHeaders = typeof existing === 'string' ? existing.split(',').map(h => h.trim()) : []
+              const existingHeaders = typeof existing === 'string' ? existing.split(',').map((h) => h.trim()) : []
               accessControlExposeHeaders.push(...existingHeaders)
             }
 

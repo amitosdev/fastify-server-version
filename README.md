@@ -21,7 +21,7 @@ fastify.register(serverVersion())
 fastify.get('/', (request, reply) => {
   reply.send({ hello: 'world' })
   // Response headers[x-server-version] = 8.8.8
-  // Response headers[x-commit-hash] = abc7878dvee0920ijdksdks
+  // Response headers[x-commit-hash] = abc7878
   // Response headers[access-control-expose-headers] = x-commit-hash, x-server-version
 })
 
@@ -49,7 +49,7 @@ fastify.register(serverVersion({ isAddAccessControlExposeHeaders: false }))
 fastify.get('/', (request, reply) => {
   reply.send({ hello: 'world' })
   // Response headers[x-server-version] = 8.8.8
-  // Response headers[x-commit-hash] = abc7878dvee0920ijdksdks
+  // Response headers[x-commit-hash] = abc7878
   // No Access-Control-Expose-Headers added by the plugin
 })
 ```
